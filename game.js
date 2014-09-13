@@ -24,11 +24,11 @@
 
   Game.prototype = {
     update: function() {
-      if(this.counter % 10 === 0) {
+      if (this.counter % 10 === 0) {
         this.bodies = this.bodies.concat(createInvaders(this, 1));
       }
 
-      if(this.player.size.x > this.size.x*2 || this.bodies.indexOf(this.player) === -1) {
+      if (this.bodies.length === 1) {
         this.running = false;
       }
 
@@ -44,25 +44,28 @@
     draw: function(screen) {
       screen.clearRect(0, 0, this.size.x, this.size.y);
 
-      if (this.running) {
-        for (var i = 0; i < this.bodies.length; i++) {
-          if (this.bodies[i].draw !== undefined) {
-            this.bodies[i].draw(screen);
-          }
+      for (var i = 0; i < this.bodies.length; i++) {
+        if (this.bodies[i].draw !== undefined) {
+          this.bodies[i].draw(screen);
+        }
+      }
+
+      if (!this.running) {
+        if (this.bodies.indexOf(this.player) === -1) {
+          screen.fillStyle = "white";
+          screen.fillRect(0, 0, this.size.x, this.size.y);
+          screen.fillStyle = "black";
+          screen.fillText("YOU LOST", this.size.x/2, this.size.y/2);
+        } else {
+          screen.fillStyle = "grey";
+          screen.fillRect(0, 0, this.size.x, this.size.y);
+          screen.fillStyle = "white";
+          screen.fillText("YOU WIN", this.size.x/2, this.size.y/2);
         }
       }
 
       screen.textAlign = "right";
       screen.fillText(this.counter++, this.size.x, 10);
-      if(!this.running) {
-        if(this.bodies.indexOf(this.player) === -1) {
-          screen.clearRect(0, 0, this.size.x, this.size.y);
-          screen.fillText("YOU LOST", this.size.x/2, this.size.y/2);
-        } else {
-          screen.fillStyle = "white";
-          screen.fillText("YOU WIN", this.size.x/2, this.size.y/2);
-        }
-      }
     },
 
     addBody: function(body) {
@@ -116,8 +119,8 @@
 
   Invader.prototype = {
     update: function() {
-      this.center.x += this.speedX;
-      this.center.y += this.speedY;
+      this.center.x += this.speedX + Math.random();
+      this.center.y += this.speedY + Math.random();
     },
 
     draw: function(screen) {
@@ -160,6 +163,7 @@
 
     remove: function() {
       this.game.removeBody(this);
+      this.game.running = false;
     },
 
     area: function() {
@@ -186,7 +190,7 @@
   };
 
   var drawBody = function(screen, body) {
-    if(body instanceof Player) {
+    if (body instanceof Player) {
       screen.fillStyle = 'grey';
     } else {
       screen.fillStyle = 'black';
