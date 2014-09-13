@@ -43,9 +43,12 @@
 
     draw: function(screen) {
       screen.clearRect(0, 0, this.size.x, this.size.y);
-      for (var i = 0; i < this.bodies.length; i++) {
-        if (this.bodies[i].draw !== undefined) {
-          this.bodies[i].draw(screen);
+
+      if (this.running) {
+        for (var i = 0; i < this.bodies.length; i++) {
+          if (this.bodies[i].draw !== undefined) {
+            this.bodies[i].draw(screen);
+          }
         }
       }
 
@@ -77,9 +80,25 @@
   var createInvaders = function(game, n) {
     var invaders = [];
     for (var i = 0; i < n; i++) {
-      var x = Math.random()*game.size.x;
-      var y = Math.random()*game.size.y;
-      invaders.push(new Invader(game, { x: x, y: y}));
+      var x, y, invader;
+      // don't generate an invader touching the player or right next to him
+      do {
+        x = Math.random()*game.size.x;
+        y = Math.random()*game.size.y;
+        invader = new Invader(game, { x: x, y: y});
+        playerSafeArea = {
+          size: {
+            x: game.player.center.x + 5,
+            y: game.player.center.y + 5
+          },
+          center: {
+            x: game.player.center.x,
+            y: game.player.center.y
+          }
+        };
+      } while (isColliding(invader, playerSafeArea));
+
+      invaders.push(invader);
     }
 
     return invaders;
@@ -105,7 +124,7 @@
       drawBody(screen, this);
     },
 
-    collision: function() {
+    remove: function() {
       this.game.removeBody(this);
     },
 
@@ -139,7 +158,7 @@
       drawBody(screen, this);
     },
 
-    collision: function() {
+    remove: function() {
       this.game.removeBody(this);
     },
 
@@ -193,38 +212,24 @@
     for (var i = 0; i < bodies.length; i++) {
       for (var j = i + 1; j < bodies.length; j++) {
         if (isColliding(bodies[i], bodies[j])) {
-          bodyPairs.push([bodies[i], bodies[j]]);
+          if (bodies[i] instanceof Player) {
+            bodyPairs.push([bodies[i], bodies[j]]);
+          } else if (bodies[j] instanceof Player) {
+            bodyPairs.push([bodies[j], bodies[i]]);
+          }
         }
       }
     }
 
     for (var i = 0; i < bodyPairs.length; i++) {
-
-      if (bodyPairs[i][1] instanceof Player && bodyPairs[i][1].area() > bodyPairs[i][0].area()) {
-        //console.log('encountered a small invader', bodyPairs[i][0]);
-        bodyPairs[i][1].size.x += bodyPairs[i][0].size.x;
-        bodyPairs[i][1].size.y += bodyPairs[i][0].size.y;
-        bodyPairs[i][0].collision(bodyPairs[i][0]);
-      } else if (bodyPairs[i][0] instanceof Player && bodyPairs[i][0].area() > bodyPairs[i][1].area()) {
-        //console.log('encountered a small invader', bodyPairs[i][1]);
-        bodyPairs[i][0].size.x += bodyPairs[i][1].size.x;
-        bodyPairs[i][0].size.y += bodyPairs[i][1].size.y;
-        bodyPairs[i][1].collision(bodyPairs[i][1]);
-      } else if (bodyPairs[i][0] instanceof Invader && bodyPairs[i][1] instanceof Invader) {
-        //invader vs invader
-        continue;
+      var player = bodyPairs[i][0];
+      var invader = bodyPairs[i][1];
+      if (player.area() > invader.area()) {
+        player.size.x += invader.size.x;
+        player.size.y += invader.size.y;
+        invader.remove(invader);
       } else {
-        if (bodyPairs[i][0] instanceof Player) {
-          //console.log('you died');
-          bodyPairs[i][0].collision(bodyPairs[i][0]);
-        } else if (bodyPairs[i][1] instanceof Player) {
-          //console.log('you died');
-          bodyPairs[i][1].collision(bodyPairs[i][1]);
-        } else {
-          //console.debug('Removed', bodyPairs[i][1]);
-          bodyPairs[i][0].collision(bodyPairs[i][0]);
-          bodyPairs[i][1].collision(bodyPairs[i][1]);
-        }
+        player.remove(player);
       }
     }
   };
