@@ -8,7 +8,7 @@
     this.player = new Player(this);
     this.running = true;
 
-    this.bodies = createInvaders(this, 24).concat(this.player);
+    this.bodies = createInvaders(this, 40).concat(this.player);
 
     var self = this;
     var tick = function() {
@@ -207,9 +207,21 @@
     );
   };
 
+  var isOutOfBound = function(b) {
+    return (
+        b.center.x + b.size.x / 2 <= 0 ||
+        b.center.y + b.size.y / 2 <= 0 ||
+        b.center.x - b.size.x / 2 >= 900 ||
+        b.center.y - b.size.y / 2 >= 600
+    );
+  };
+
   var reportCollisions = function(bodies) {
     var bodyPairs = [];
     for (var i = 0; i < bodies.length; i++) {
+      if (isOutOfBound(bodies[i])) {
+        bodies[i].remove(bodies[i]);
+      }
       for (var j = i + 1; j < bodies.length; j++) {
         if (isColliding(bodies[i], bodies[j])) {
           if (bodies[i] instanceof Player) {
