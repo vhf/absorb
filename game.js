@@ -99,8 +99,6 @@
     update: function() {
       this.center.x += this.speedX;
       this.center.y += this.speedY;
-
-      this.patrolX += this.speedX;
     },
 
     draw: function(screen) {
