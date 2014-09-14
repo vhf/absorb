@@ -33,9 +33,7 @@
       }
 
       for (var i = 0; i < this.bodies.length; i++) {
-        if (this.bodies[i].update !== undefined) {
-          this.bodies[i].update();
-        }
+        this.bodies[i].update();
       }
 
       reportCollisions(this.bodies);
@@ -45,9 +43,7 @@
       screen.clearRect(0, 0, this.size.x, this.size.y);
 
       for (var i = 0; i < this.bodies.length; i++) {
-        if (this.bodies[i].draw !== undefined) {
-          this.bodies[i].draw(screen);
-        }
+        this.bodies[i].draw(screen);
       }
 
       if (!this.running) {
@@ -145,14 +141,18 @@
 
   Player.prototype = {
     update: function() {
-      if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT)) {
+      if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT) &&
+          this.center.x >= 0) {
         this.center.x -= 2;
-      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT)) {
+      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT) &&
+                 this.center.x <= this.game.size.x) {
         this.center.x += 2;
       }
-      if (this.keyboarder.isDown(this.keyboarder.KEYS.UP)) {
+      if (this.keyboarder.isDown(this.keyboarder.KEYS.UP) &&
+          this.center.y >= 0) {
         this.center.y -= 2;
-      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN)) {
+      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN) &&
+                 this.center.y <= this.game.size.y) {
         this.center.y += 2;
       }
     },
