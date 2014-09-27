@@ -1,4 +1,5 @@
-;(function() {
+(function() {
+  "use strict";
   var Game = function() {
     var screen = document.getElementById("canvas").getContext('2d');
 
@@ -85,7 +86,7 @@
         x = Math.random()*game.size.x;
         y = Math.random()*game.size.y;
         invader = new Invader(game, { x: x, y: y});
-        playerSafeArea = {
+        var playerSafeArea = {
           size: {
             x: game.player.center.x + 5,
             y: game.player.center.y + 5
@@ -104,7 +105,7 @@
   };
 
   var Invader = function(game, center) {
-    size = Math.random()*50+5;
+    var size = Math.random()*50+5;
     this.game = game;
     this.size = { x: size, y: size };
     this.center = center;
